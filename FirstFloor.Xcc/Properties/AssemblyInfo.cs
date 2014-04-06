@@ -5,14 +5,14 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FirstFloor.Xcc")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Xcc")]
+[assembly: AssemblyDescription("XAML Conditional Compilation")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("FirstFloor.Xcc")]
-[assembly: AssemblyCopyright("Copyright ©  2014")]
+[assembly: AssemblyCompany("First Floor Software")]
+[assembly: AssemblyProduct("Xcc")]
+[assembly: AssemblyCopyright("Copyright © First Floor Software 2014")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyCulture("en-us")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
