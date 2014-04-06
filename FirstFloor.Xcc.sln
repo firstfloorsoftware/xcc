@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30324.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirstFloor.Xcc", "FirstFloor.Xcc\FirstFloor.Xcc.csproj", "{676F5AE5-48B2-4017-9A98-3BF571EBBD7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirstFloor.Xcc.Test", "FirstFloor.Xcc.Test\FirstFloor.Xcc.Test.csproj", "{F1E02C83-C663-4F7A-BFB4-38C1D789C806}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{676F5AE5-48B2-4017-9A98-3BF571EBBD7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{676F5AE5-48B2-4017-9A98-3BF571EBBD7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{676F5AE5-48B2-4017-9A98-3BF571EBBD7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{676F5AE5-48B2-4017-9A98-3BF571EBBD7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1E02C83-C663-4F7A-BFB4-38C1D789C806}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1E02C83-C663-4F7A-BFB4-38C1D789C806}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1E02C83-C663-4F7A-BFB4-38C1D789C806}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1E02C83-C663-4F7A-BFB4-38C1D789C806}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

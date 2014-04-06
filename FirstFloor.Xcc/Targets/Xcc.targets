@@ -1,0 +1,33 @@
+﻿<!--
+***********************************************************************************************
+FirstFloor.XamlToolkit.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy. 
+
+Copyright (C) First Floor Software. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="PreprocessXaml" AssemblyFile="$(MSBuildThisFileDirectory)..\tools\Xcc.dll" />
+
+  <Target Name="GenerateXaml" BeforeTargets="MarkupCompilePass1">
+    <!-- preprocess xaml pages -->
+    <PreprocessXaml ApplicationDefinitions="@(ApplicationDefinition)"
+                    Pages="@(Page)"
+                    DefinedSymbols="$(DefineConstants)"
+                    OutputPath="$(IntermediateOutputPath)preprocessedxaml\">
+      <Output ItemName="ProcessedApplicationDefinition" TaskParameter="ProcessedApplicationDefinitions" />
+      <Output ItemName="ProcessedPage" TaskParameter="ProcessedPages" />
+      <Output ItemName="FileWrites" TaskParameter="GeneratedFiles" />
+    </PreprocessXaml>
+    <ItemGroup>
+      <ApplicationDefinition Remove="@(ApplicationDefinition)" />
+      <Page Remove="@(Page)" />
+
+      <ApplicationDefinition Include="@(ProcessedApplicationDefinition)" />
+      <Page Include="@(ProcessedPage)" />
+    </ItemGroup>
+  </Target>
+</Project>

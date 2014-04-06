@@ -1,0 +1,22 @@
+﻿<Page x:Class="App1.MainPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:App1" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:win81="condition:WINDOWS_APP" xmlns:wp81="condition:WINDOWS_PHONE_APP" xmlns:debug="condition:DEBUG" mc:Ignorable="d win81 wp81 debug">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel>
+            <Button Content="Default button" />
+            <Button Content="Colored button" Background="Green" />
+            
+            <Button Content="Windows Phone 8.1" />
+
+            <Grid>
+                
+            </Grid>
+
+            
+
+            <Grid>
+                <!-- Windows Phone 8.1 AdControl-->
+                <AdControl ApplicationId="d25517cb-12d4-4699-8bdc-52040c712cab" AdUnitId="10043107" HorizontalAlignment="Left" Height="250" VerticalAlignment="Top" Width="250" xmlns="using:Microsoft.Advertising.Mobile.UI" />
+            </Grid>
+        </StackPanel>
+    </Grid>
+</Page>
