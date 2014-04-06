@@ -9,6 +9,8 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A XAML preprocessor adding conditional compilation support to XAML files</description>
     <releaseNotes>This is a proof of concept</releaseNotes>
+    <projectUrl>http://xcc.codeplex.com</projectUrl>
+    <licenseUrl>https://xcc.codeplex.com/license</licenseUrl>
     <copyright>Copyright 2014 First Floor Software</copyright>
     <tags>XAML, preprocessor, conditional compilation</tags>
   </metadata>
