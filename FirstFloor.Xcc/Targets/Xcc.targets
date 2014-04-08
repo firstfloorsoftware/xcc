@@ -18,16 +18,18 @@ Copyright (C) First Floor Software. All rights reserved.
                     Pages="@(Page)"
                     DefinedSymbols="$(DefineConstants)"
                     OutputPath="$(IntermediateOutputPath)preprocessedxaml\">
-      <Output ItemName="ProcessedApplicationDefinition" TaskParameter="ProcessedApplicationDefinitions" />
-      <Output ItemName="ProcessedPage" TaskParameter="ProcessedPages" />
+      <Output ItemName="OldApplicationDefinition" TaskParameter="OldApplicationDefinitions" />
+      <Output ItemName="OldPage" TaskParameter="OldPages" />
+      <Output ItemName="NewApplicationDefinition" TaskParameter="NewApplicationDefinitions" />
+      <Output ItemName="NewPage" TaskParameter="NewPages" />
       <Output ItemName="FileWrites" TaskParameter="GeneratedFiles" />
     </PreprocessXaml>
     <ItemGroup>
-      <ApplicationDefinition Remove="@(ApplicationDefinition)" />
-      <Page Remove="@(Page)" />
+      <ApplicationDefinition Remove="@(OldApplicationDefinition)" />
+      <Page Remove="@(OldPage)" />
 
-      <ApplicationDefinition Include="@(ProcessedApplicationDefinition)" />
-      <Page Include="@(ProcessedPage)" />
+      <ApplicationDefinition Include="@(NewApplicationDefinition)" />
+      <Page Include="@(NewPage)" />
     </ItemGroup>
   </Target>
 </Project>

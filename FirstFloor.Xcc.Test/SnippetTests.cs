@@ -40,6 +40,14 @@ namespace FirstFloor.Xcc.Test
         }
 
         [TestMethod]
+        public void TestNoUpdates()
+        {
+            TestXaml("WINDOWS_APP",
+                "<Grid><Button/></Grid>",
+                "<Grid><Button/></Grid>");
+        }
+        
+        [TestMethod]
         public void TestGridWin81()
         {
             TestXaml("WINDOWS_APP",

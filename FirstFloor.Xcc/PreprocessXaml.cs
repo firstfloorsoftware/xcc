@@ -37,15 +37,25 @@ namespace FirstFloor.Xcc
         public string OutputPath { get; set; }
 
         /// <summary>
-        /// The output ProcessedApplicationDefinitions parameter.
+        /// The output OldApplicationDefinitions parameter.
         /// </summary>
         [Output]
-        public ITaskItem[] ProcessedApplicationDefinitions { get; set; }
+        public ITaskItem[] OldApplicationDefinitions { get; set; }
         /// <summary>
-        /// The output ProcessedPages parameter.
+        /// The output NewApplicationDefinitions parameter.
         /// </summary>
         [Output]
-        public ITaskItem[] ProcessedPages { get; set; }
+        public ITaskItem[] NewApplicationDefinitions { get; set; }
+        /// <summary>
+        /// The output OldPages parameter.
+        /// </summary>
+        [Output]
+        public ITaskItem[] OldPages { get; set; }
+        /// <summary>
+        /// The output NewPages parameter.
+        /// </summary>
+        [Output]
+        public ITaskItem[] NewPages { get; set; }
         /// <summary>
         /// The output GeneratedFiles parameter.
         /// </summary>
@@ -61,21 +71,35 @@ namespace FirstFloor.Xcc
         public override bool Execute()
         {
             try {
-                var processedAppDefs = new List<ITaskItem>();
-                var processedPages = new List<ITaskItem>();
+                var oldAppDefs = new List<ITaskItem>();
+                var oldPages = new List<ITaskItem>();
+                var newAppDefs = new List<ITaskItem>();
+                var newPages = new List<ITaskItem>();
                 var generatedFiles = new List<ITaskItem>();
 
                 var preprocessor = new XamlPreprocessor(this.DefinedSymbols);
 
                 foreach (var appDef in this.ApplicationDefinitions) {
-                    ProcessFile(appDef, preprocessor, processedAppDefs, generatedFiles);
+                    var newAppDef = ProcessFile(appDef, preprocessor);
+                    if (newAppDef != null) {
+                        oldAppDefs.Add(appDef);
+                        newAppDefs.Add(newAppDef);
+                        generatedFiles.Add(newAppDef);
+                    }
                 }
                 foreach (var page in this.Pages) {
-                    ProcessFile(page, preprocessor, processedPages, generatedFiles);
+                    var newPage = ProcessFile(page, preprocessor);
+                    if (newPage != null) {
+                        oldPages.Add(page);
+                        newPages.Add(newPage);
+                        generatedFiles.Add(newPage);
+                    }
                 }
 
-                this.ProcessedApplicationDefinitions = processedAppDefs.ToArray();
-                this.ProcessedPages = processedPages.ToArray();
+                this.OldApplicationDefinitions = oldAppDefs.ToArray();
+                this.NewApplicationDefinitions = newAppDefs.ToArray();
+                this.OldPages = oldPages.ToArray();
+                this.NewPages = newPages.ToArray();
                 this.GeneratedFiles = generatedFiles.ToArray();
 
                 return true;
@@ -87,7 +111,7 @@ namespace FirstFloor.Xcc
             }
         }
 
-        private void ProcessFile(ITaskItem file, XamlPreprocessor preprocessor, List<ITaskItem> processedFiles, List<ITaskItem> generatedFiles)
+        private ITaskItem ProcessFile(ITaskItem file, XamlPreprocessor preprocessor)
         {
             var sourcePath = file.GetMetadata("FullPath");
 
@@ -98,24 +122,22 @@ namespace FirstFloor.Xcc
             }
             var targetPath = Path.Combine(this.OutputPath, targetRelativePath);
 
-            // ensure target directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+            TaskItem result = null;
 
             // process XAML
             Log.LogMessage(MessageImportance.High, "Preprocessing {0}", targetRelativePath);
             var start = DateTime.Now;
-            preprocessor.ProcessXamlFile(sourcePath, targetPath);
-            Log.LogMessage(MessageImportance.Low, "Preprocess completed in {0}ms", (DateTime.Now - start).TotalMilliseconds);
+            if (preprocessor.ProcessXamlFile(sourcePath, targetPath)) {
+                // targetPath has been written, create linked item
+                result = new TaskItem(targetPath);
+                file.CopyMetadataTo(result);
+                result.SetMetadata("Link", targetRelativePath);          // this is the trick that makes it all work (replace page with a page link pointing to \obj\debug\preprocessedxaml\*)
+            }
 
-            // create a linked item to the target path
-            var targetFile = new TaskItem(targetPath);
-            file.CopyMetadataTo(targetFile);
-            targetFile.SetMetadata("Link", targetRelativePath);          // this is the trick that makes it all work (replace page with a page link pointing to \obj\debug\preprocessedxaml\*)
+            var duration = (DateTime.Now - start).TotalMilliseconds;
+            Log.LogMessage(MessageImportance.Low, "Preprocess completed in {0}ms, {1} has {2}changed", duration, targetRelativePath, result == null ? "not " : "");
 
-            processedFiles.Add(targetFile);
-
-            // and keep track of the generated file for cleanup
-            generatedFiles.Add(new TaskItem(targetPath));
+            return result;
         }
     }
 }

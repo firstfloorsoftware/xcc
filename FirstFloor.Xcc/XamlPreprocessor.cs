@@ -31,14 +31,20 @@ namespace FirstFloor.Xcc
         /// </summary>
         /// <param name="sourcePath">The source path.</param>
         /// <param name="targetPath">The target path.</param>
-        public void ProcessXamlFile(string sourcePath, string targetPath)
+        /// <returns>A value indicating whether the target XAML file has been written. If no changes are made to the XAML, the targetPath is not written and false is returned.</returns>
+        public bool ProcessXamlFile(string sourcePath, string targetPath)
         {
             var xamlDoc = XDocument.Load(sourcePath, LoadOptions.PreserveWhitespace);
-            ProcessXaml(xamlDoc);
+            if (ProcessXaml(xamlDoc)) {
+                // ensure target directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
 
-            using (var stream = File.OpenWrite(targetPath)) {
-                SaveDocument(xamlDoc, stream);
+                using (var stream = File.OpenWrite(targetPath)) {
+                    SaveDocument(xamlDoc, stream);
+                }
+                return true;
             }
+            return false;
         }
 
         /// <summary>
@@ -49,7 +55,9 @@ namespace FirstFloor.Xcc
         public string ProcessXaml(string xaml)
         {
             var xamlDoc = XDocument.Parse(xaml, LoadOptions.PreserveWhitespace);
-            ProcessXaml(xamlDoc);
+            if (!ProcessXaml(xamlDoc)) {
+                return xaml;        // no changes, return XAML as-is
+            }
 
             using (var stream = new MemoryStream()) {
                 SaveDocument(xamlDoc, stream);
@@ -74,18 +82,24 @@ namespace FirstFloor.Xcc
             writer.Flush();
         }
 
-        private void ProcessXaml(XDocument xamlDoc)
+        private bool ProcessXaml(XDocument xamlDoc)
         {
+            var updated = false;    // indicates whether the XAML has been updated
+
             // using a Stack rather than relatively slow recursion
             var stack = new Stack<XElement>();
             stack.Push(xamlDoc.Root);
 
             while (stack.Count > 0) {
                 var element = stack.Pop();
-                if (ProcessElement(element)) {
+                bool elementUpdated;
+                if (ProcessElement(element, out elementUpdated)) {
                     foreach (var e in element.Elements()) {
                         stack.Push(e);
                     }
+                }
+                if (elementUpdated) {
+                    updated = true;
                 }
             }
 
@@ -93,14 +107,21 @@ namespace FirstFloor.Xcc
             var processContent = xamlDoc.Root.Attribute(XName.Get("ProcessContent", Xmlns.MarkupCompatibility));
             if (processContent != null) {
                 processContent.Remove();
+                updated = true;
             }
+
+            return updated;
         }
 
-        private bool ProcessElement(XElement element)
+        private bool ProcessElement(XElement element, out bool updated)
         {
+            updated = false;
+
             // check if element should be included
             var elemMatch = Include(element.Name);
             if (elemMatch.HasValue) {
+                updated = true;
+
                 if (elemMatch.Value) {
                     // move element to XAML namespace
                     element.Name = XName.Get(element.Name.LocalName, Xmlns.XamlPresentation);
@@ -118,6 +139,8 @@ namespace FirstFloor.Xcc
                 var attrMatch = Include(attribute.Name);
 
                 if (attrMatch.HasValue) {
+                    updated = true;
+
                     if (attrMatch.Value) {
                         // replace attribute
                         attribute.Remove();
