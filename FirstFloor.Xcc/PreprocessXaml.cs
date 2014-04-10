@@ -75,7 +75,6 @@ namespace FirstFloor.Xcc
                 var oldPages = new List<ITaskItem>();
                 var newAppDefs = new List<ITaskItem>();
                 var newPages = new List<ITaskItem>();
-                var generatedFiles = new List<ITaskItem>();
 
                 var preprocessor = new XamlPreprocessor(this.DefinedSymbols);
 
@@ -84,7 +83,6 @@ namespace FirstFloor.Xcc
                     if (newAppDef != null) {
                         oldAppDefs.Add(appDef);
                         newAppDefs.Add(newAppDef);
-                        generatedFiles.Add(newAppDef);
                     }
                 }
                 foreach (var page in this.Pages) {
@@ -92,7 +90,6 @@ namespace FirstFloor.Xcc
                     if (newPage != null) {
                         oldPages.Add(page);
                         newPages.Add(newPage);
-                        generatedFiles.Add(newPage);
                     }
                 }
 
@@ -100,7 +97,7 @@ namespace FirstFloor.Xcc
                 this.NewApplicationDefinitions = newAppDefs.ToArray();
                 this.OldPages = oldPages.ToArray();
                 this.NewPages = newPages.ToArray();
-                this.GeneratedFiles = generatedFiles.ToArray();
+                this.GeneratedFiles = newAppDefs.Concat(newPages).ToArray();
 
                 return true;
             }
