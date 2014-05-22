@@ -39,7 +39,7 @@ namespace FirstFloor.Xcc
                 // ensure target directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
 
-                using (var stream = File.OpenWrite(targetPath)) {
+                using (var stream = File.Create(targetPath)) {
                     SaveDocument(xamlDoc, stream);
                 }
                 return true;
