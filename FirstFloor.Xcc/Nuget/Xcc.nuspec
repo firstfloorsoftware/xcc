@@ -1,22 +1,22 @@
-<?xml version="1.0"?>
-<package >
-  <metadata>
-    <id>xcc</id>
-    <version>1.0.0</version>
-    <title>XAML Conditional Compilation</title>
-    <authors>First Floor Software</authors>
-    <owners>First Floor Software</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>A XAML preprocessor adding conditional compilation support to XAML files</description>
-    <releaseNotes>This is a proof of concept</releaseNotes>
-    <projectUrl>http://xcc.codeplex.com</projectUrl>
-    <licenseUrl>https://xcc.codeplex.com/license</licenseUrl>
-    <copyright>Copyright 2014 First Floor Software</copyright>
-    <tags>XAML, preprocessor, conditional compilation</tags>
-  </metadata>
-  <files>
-    <file src="..\Targets\Xcc.targets" target="build" />
-    <file src="..\bin\Release\Xcc.dll" target="tools" />
-    <file src="readme.txt" target="" />
-  </files>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>xcc</id>
+        <version>1.0.1</version>
+        <title>XAML Conditional Compilation</title>
+        <authors>First Floor Software</authors>
+        <owners>First Floor Software</owners>
+        <licenseUrl>https://xcc.codeplex.com/license</licenseUrl>
+        <projectUrl>http://xcc.codeplex.com</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>A XAML preprocessor adding conditional compilation support to XAML files</description>
+        <releaseNotes>1.0.1: Fixed trailing content bug</releaseNotes>
+        <copyright>Copyright 2014 First Floor Software</copyright>
+        <tags>XAML, preprocessor, conditional compilation</tags>
+    </metadata>
+    <files>
+        <file src="..\Targets\Xcc.targets" target="build\Xcc.targets" />
+        <file src="..\bin\Release\Xcc.dll" target="tools\Xcc.dll" />
+        <file src="ReadMe.txt" target="ReadMe.txt" />
+    </files>
 </package>
