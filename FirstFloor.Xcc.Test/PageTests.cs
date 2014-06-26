@@ -32,6 +32,30 @@ namespace FirstFloor.Xcc.Test
             TestXaml("WINDOWS_PHONE_APP;!DEBUG", "MyPage.xaml", "MyPage.WP81.Release.expected.xaml");
         }
 
+        [TestMethod]
+        public void TestXamarinContentPageAndroid()
+        {
+            TestXaml("__ANDROID__", "XamarinContentPage.xaml", "XamarinContentPage.android.expected.xaml");
+        }
+
+        [TestMethod]
+        public void TestXamarinContentPageiOs()
+        {
+            TestXaml("__IOS__", "XamarinContentPage.xaml", "XamarinContentPage.ios.expected.xaml");
+        }
+
+        [TestMethod]
+        public void TestXamarinContentPageWP()
+        {
+            TestXaml("WINDOWS_PHONE", "XamarinContentPage.xaml", "XamarinContentPage.wp.expected.xaml");
+        }
+
+        [TestMethod]
+        public void TestXamarinContentPageNoSymbols()
+        {
+            TestXaml("", "XamarinContentPage.xaml", "XamarinContentPage.nosymbols.expected.xaml");
+        }
+
         private static void TestXaml(string symbols, string xamlName, string expectedXamlName)
         {
             var preprocessor = new XamlPreprocessor(symbols);

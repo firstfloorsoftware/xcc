@@ -1,0 +1,8 @@
+﻿<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="MobileApp1.MyPage">
+    <StackLayout VerticalOptions="FillAndExpand">
+        <Label Text="Always visible" VerticalOptions="Center" HorizontalOptions="Center" />
+        <Label Text="Android only" VerticalOptions="Center" HorizontalOptions="Center" />
+        
+        
+    </StackLayout>
+</ContentPage>

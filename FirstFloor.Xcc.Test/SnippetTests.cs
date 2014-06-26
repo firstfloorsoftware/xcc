@@ -43,8 +43,8 @@ namespace FirstFloor.Xcc.Test
         public void TestNoUpdates()
         {
             TestXaml("WINDOWS_APP",
-                "<Grid><Button/></Grid>",
-                "<Grid><Button/></Grid>");
+                "<Grid><Button /></Grid>",
+                "<Grid><Button /></Grid>");
         }
         
         [TestMethod]
@@ -245,16 +245,25 @@ namespace FirstFloor.Xcc.Test
         private static void TestXaml(string symbols, string xamlSnippet, string expectedResult)
         {
             var preprocessor = new XamlPreprocessor(symbols);
-            var xaml = CreateXamlPage(xamlSnippet);
+            var xaml = CreateInputXamlPage(xamlSnippet);
             var result = preprocessor.ProcessXaml(xaml);
 
-            Assert.AreEqual(CreateXamlPage(expectedResult), result);
+            Assert.AreEqual(CreateResultXamlPage(expectedResult), result);
         }
 
-        private static string CreateXamlPage(string snippet)
+        private static string CreateInputXamlPage(string snippet)
         {
             return string.Format(CultureInfo.InvariantCulture, @"
-<Page xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" xmlns:mc=""http://schemas.openxmlformats.org/markup-compatibility/2006"" xmlns:debug=""condition:DEBUG"" xmlns:release=""condition:!DEBUG"" xmlns:win81=""condition:WINDOWS_APP"" xmlns:wp81=""condition:WINDOWS_PHONE_APP"" mc:Ignorable=""debug:* release:* win81:* wp81:*"">
+<Page xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" xmlns:mc=""http://schemas.openxmlformats.org/markup-compatibility/2006"" xmlns:debug=""condition:DEBUG"" xmlns:release=""condition:!DEBUG"" xmlns:win81=""condition:WINDOWS_APP"" xmlns:wp81=""condition:WINDOWS_PHONE_APP"" mc:Ignorable=""debug release win81 wp81"" mc:ProcessContent=""debug:* release:* win81:* wp81:*"">
+{0}
+</Page>
+", snippet);
+        }
+
+        private static string CreateResultXamlPage(string snippet)
+        {
+            return string.Format(CultureInfo.InvariantCulture, @"
+<Page xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" xmlns:mc=""http://schemas.openxmlformats.org/markup-compatibility/2006"">
 {0}
 </Page>
 ", snippet);
