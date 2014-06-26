@@ -12,24 +12,36 @@ Copyright (C) First Floor Software. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask TaskName="PreprocessXaml" AssemblyFile="$(MSBuildThisFileDirectory)..\bin\Debug\Xcc.dll" />
 
-  <Target Name="GenerateXaml" BeforeTargets="MarkupCompilePass1">
+  <Target Name="GenerateXaml" BeforeTargets="MarkupCompilePass1" AfterTargets="GenerateXamlG">
+    <!-- create collection for embedded xaml resources -->
+    <CreateItem Include="@(EmbeddedResource)" Condition="'%(Extension)' == '.xaml'">
+      <Output TaskParameter="Include" ItemName="EmbeddedXamlResource"/>
+    </CreateItem>
+
+    <PropertyGroup>
+      <!-- ensure __ANDROID__ symbol is defined when targetting Android platform -->
+      <DefineConstants Condition="'$(TargetFrameworkIdentifier)' == 'MonoAndroid'">__ANDROID__;$(DefineConstants)</DefineConstants>
+    </PropertyGroup>
+
     <!-- preprocess xaml pages -->
     <PreprocessXaml ApplicationDefinitions="@(ApplicationDefinition)"
                     Pages="@(Page)"
+                    EmbeddedXamlResources="@(EmbeddedXamlResource)"
                     DefinedSymbols="$(DefineConstants)"
                     OutputPath="$(IntermediateOutputPath)preprocessedxaml\">
-      <Output ItemName="OldApplicationDefinition" TaskParameter="OldApplicationDefinitions" />
-      <Output ItemName="OldPage" TaskParameter="OldPages" />
       <Output ItemName="NewApplicationDefinition" TaskParameter="NewApplicationDefinitions" />
       <Output ItemName="NewPage" TaskParameter="NewPages" />
+      <Output ItemName="NewEmbeddedXamlResource" TaskParameter="NewEmbeddedXamlResources" />
       <Output ItemName="FileWrites" TaskParameter="GeneratedFiles" />
     </PreprocessXaml>
     <ItemGroup>
-      <ApplicationDefinition Remove="@(OldApplicationDefinition)" />
-      <Page Remove="@(OldPage)" />
+      <ApplicationDefinition Remove="@(ApplicationDefinition)" />
+      <Page Remove="@(Page)" />
+      <EmbeddedResource Remove="@(EmbeddedXamlResource)" />
 
       <ApplicationDefinition Include="@(NewApplicationDefinition)" />
       <Page Include="@(NewPage)" />
+      <EmbeddedResource Include="@(NewEmbeddedXamlResource)" />
     </ItemGroup>
   </Target>
 </Project>

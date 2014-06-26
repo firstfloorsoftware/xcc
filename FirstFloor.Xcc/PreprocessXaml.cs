@@ -31,31 +31,31 @@ namespace FirstFloor.Xcc
         [Required]
         public ITaskItem[] Pages { get; set; }
         /// <summary>
+        /// The required EmbeddedXamlResources parameter.
+        /// </summary>
+        [Required]
+        public ITaskItem[] EmbeddedXamlResources { get; set; }
+        /// <summary>
         /// The required OutputPath parameter.
         /// </summary>
         [Required]
         public string OutputPath { get; set; }
 
         /// <summary>
-        /// The output OldApplicationDefinitions parameter.
-        /// </summary>
-        [Output]
-        public ITaskItem[] OldApplicationDefinitions { get; set; }
-        /// <summary>
         /// The output NewApplicationDefinitions parameter.
         /// </summary>
         [Output]
         public ITaskItem[] NewApplicationDefinitions { get; set; }
         /// <summary>
-        /// The output OldPages parameter.
-        /// </summary>
-        [Output]
-        public ITaskItem[] OldPages { get; set; }
-        /// <summary>
         /// The output NewPages parameter.
         /// </summary>
         [Output]
         public ITaskItem[] NewPages { get; set; }
+        /// <summary>
+        /// The output NewEmbeddedXamlResources parameter.
+        /// </summary>
+        [Output]
+        public ITaskItem[] NewEmbeddedXamlResources { get; set; }
         /// <summary>
         /// The output GeneratedFiles parameter.
         /// </summary>
@@ -71,33 +71,17 @@ namespace FirstFloor.Xcc
         public override bool Execute()
         {
             try {
-                var oldAppDefs = new List<ITaskItem>();
-                var oldPages = new List<ITaskItem>();
-                var newAppDefs = new List<ITaskItem>();
-                var newPages = new List<ITaskItem>();
+                Log.LogMessage(MessageImportance.Normal, "XCC > DefinedSymbols: {0}", string.Join(",", this.DefinedSymbols));
 
                 var preprocessor = new XamlPreprocessor(this.DefinedSymbols);
 
-                foreach (var appDef in this.ApplicationDefinitions) {
-                    var newAppDef = ProcessFile(appDef, preprocessor);
-                    if (newAppDef != null) {
-                        oldAppDefs.Add(appDef);
-                        newAppDefs.Add(newAppDef);
-                    }
-                }
-                foreach (var page in this.Pages) {
-                    var newPage = ProcessFile(page, preprocessor);
-                    if (newPage != null) {
-                        oldPages.Add(page);
-                        newPages.Add(newPage);
-                    }
-                }
+                var generatedFiles = new List<ITaskItem>();
 
-                this.OldApplicationDefinitions = oldAppDefs.ToArray();
-                this.NewApplicationDefinitions = newAppDefs.ToArray();
-                this.OldPages = oldPages.ToArray();
-                this.NewPages = newPages.ToArray();
-                this.GeneratedFiles = newAppDefs.Concat(newPages).ToArray();
+                this.NewApplicationDefinitions = ProcessFiles(this.ApplicationDefinitions, generatedFiles, preprocessor).ToArray();
+                this.NewPages = ProcessFiles(this.Pages, generatedFiles, preprocessor).ToArray();
+                this.NewEmbeddedXamlResources = ProcessFiles(this.EmbeddedXamlResources, generatedFiles, preprocessor).ToArray();
+
+                this.GeneratedFiles = generatedFiles.ToArray();
 
                 return true;
             }
@@ -105,6 +89,20 @@ namespace FirstFloor.Xcc
                 Log.LogErrorFromException(e);
 
                 return false;
+            }
+        }
+
+        private IEnumerable<ITaskItem> ProcessFiles(ITaskItem[] files, List<ITaskItem> generatedFiles, XamlPreprocessor preprocessor)
+        {
+            foreach (var file in files) {
+                var newFile = ProcessFile(file, preprocessor);
+                if (newFile != null) {
+                    generatedFiles.Add(newFile);
+                    yield return newFile;
+                }
+                else {
+                    yield return file;      // return file as-is
+                }
             }
         }
 
@@ -117,12 +115,18 @@ namespace FirstFloor.Xcc
             if (string.IsNullOrEmpty(targetRelativePath)) {
                 targetRelativePath = file.ItemSpec;
             }
+
+            // if targetRelativePath is still absolute, use file name
+            if (Path.IsPathRooted(targetRelativePath)) {
+                targetRelativePath = Path.GetFileName(targetRelativePath);
+            }
+
             var targetPath = Path.Combine(this.OutputPath, targetRelativePath);
 
             TaskItem result = null;
 
             // process XAML
-            Log.LogMessage(MessageImportance.High, "Preprocessing {0}", targetRelativePath);
+            Log.LogMessage(MessageImportance.High, "XCC > Preprocessing {0}", targetRelativePath);
             var start = DateTime.Now;
             if (preprocessor.ProcessXamlFile(sourcePath, targetPath)) {
                 // targetPath has been written, create linked item
@@ -132,7 +136,7 @@ namespace FirstFloor.Xcc
             }
 
             var duration = (DateTime.Now - start).TotalMilliseconds;
-            Log.LogMessage(MessageImportance.Low, "Preprocess completed in {0}ms, {1} has {2}changed", duration, targetRelativePath, result == null ? "not " : "");
+            Log.LogMessage(MessageImportance.Normal, "XCC > Preprocess completed in {0}ms, {1} has {2}changed", duration, targetRelativePath, result == null ? "not " : "");
 
             return result;
         }

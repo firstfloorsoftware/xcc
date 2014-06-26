@@ -103,11 +103,36 @@ namespace FirstFloor.Xcc
                 }
             }
 
-            // clear mc:ProcessContent from root (XBF compiler chokes on it)
-            var processContent = xamlDoc.Root.Attribute(XName.Get("ProcessContent", Xmlns.MarkupCompatibility));
-            if (processContent != null) {
-                processContent.Remove();
+            // clear markup compatibility and condition xmlns attributes from root
+            //  * WinRT XBF compiler doesn't appreciate mc:ProcessContent
+            //  * Xamarin Forms crashes on custom condition namespaces
+            var removedPrefixes = new List<string>();
+            foreach (var attr in from a in xamlDoc.Root.Attributes().ToArray()          // ToArray since we are modifying the attribute collection
+                                 where a.Name == XName.Get("ProcessContent", Xmlns.MarkupCompatibility) || (a.IsNamespaceDeclaration && a.Value.StartsWith("condition:"))
+                                 select a) {
+                attr.Remove();
+
+                if (attr.IsNamespaceDeclaration) {
+                    removedPrefixes.Add(attr.Name.LocalName);
+                }
+
                 updated = true;
+            }
+
+            if (removedPrefixes.Any()) {
+                // update existing mc:Ignorable accordingly
+                var ignorableAttribute = xamlDoc.Root.Attribute(XName.Get("Ignorable", Xmlns.MarkupCompatibility));
+                if (ignorableAttribute != null) {
+                    var prefixes = ignorableAttribute.Value.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);      //char[0] defaults to any whitespace
+                    ignorableAttribute.Value = string.Join(" ", from p in prefixes
+                                                                where !removedPrefixes.Contains(p)
+                                                                select p);
+
+                    // remove mc:Ignorable if value is empty
+                    if (string.IsNullOrEmpty(ignorableAttribute.Value)) {
+                        ignorableAttribute.Remove();
+                    }
+                }
             }
 
             return updated;
@@ -123,8 +148,8 @@ namespace FirstFloor.Xcc
                 updated = true;
 
                 if (elemMatch.Value) {
-                    // move element to XAML namespace
-                    element.Name = XName.Get(element.Name.LocalName, Xmlns.XamlPresentation);
+                    // move element to same namespace as root
+                    element.Name = XName.Get(element.Name.LocalName, element.Document.Root.Name.NamespaceName);
                 }
                 else {
                     // remove element
