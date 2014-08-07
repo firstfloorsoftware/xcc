@@ -18,16 +18,27 @@ Copyright (C) First Floor Software. All rights reserved.
       <Output TaskParameter="Include" ItemName="EmbeddedXamlResource"/>
     </CreateItem>
 
-    <PropertyGroup>
-      <!-- ensure __ANDROID__ symbol is defined when targetting Android platform -->
-      <DefineConstants Condition="'$(TargetFrameworkIdentifier)' == 'MonoAndroid'">__ANDROID__;$(DefineConstants)</DefineConstants>
+    <PropertyGroup Label="Globals">
+      <!-- support for .NET projects (used by default) -->
+      <PreprocessorDefinitions>$(DefineConstants)</PreprocessorDefinitions>
+
+      <!-- support for Visual C++ projects (will override the definition above as 'DefineConstants' and 'ClCompile.PreprocessorDefinitions' cannot be co-existant) -->
+      <PreprocessorDefinitions Condition="%(ClCompile.PreprocessorDefinitions) != ''">%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
+    </PropertyGroup>
+
+    <!-- ensure __ANDROID__ symbol is defined when targetting Android platform with .NET -->
+    <PropertyGroup Condition="'$(DefineConstants)' != '' and '$(TargetFrameworkIdentifier)' == 'MonoAndroid'">
+      <PreprocessorDefinitions Condition="'$(PreprocessorDefinitions)' == ''">__ANDROID__;$(DefineConstants)</PreprocessorDefinitions>
+
+      <!-- Make sure changes to 'PreprocessorDefinitions' are preserved (could make future updates easier) -->
+      <PreprocessorDefinitions Condition="'$(PreprocessorDefinitions)' != ''">__ANDROID__;$(PreprocessorDefinitions)</PreprocessorDefinitions>
     </PropertyGroup>
 
     <!-- preprocess xaml pages -->
     <PreprocessXaml ApplicationDefinitions="@(ApplicationDefinition)"
                     Pages="@(Page)"
                     EmbeddedXamlResources="@(EmbeddedXamlResource)"
-                    DefinedSymbols="$(DefineConstants)"
+                    DefinedSymbols="$(PreprocessorDefinitions)"
                     OutputPath="$(IntermediateOutputPath)preprocessedxaml\">
       <Output ItemName="NewApplicationDefinition" TaskParameter="NewApplicationDefinitions" />
       <Output ItemName="NewPage" TaskParameter="NewPages" />
