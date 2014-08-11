@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>xcc</id>
-        <version>1.0.2</version>
+        <version>1.0.3</version>
         <title>XAML Conditional Compilation</title>
         <authors>First Floor Software</authors>
         <owners>First Floor Software</owners>
@@ -10,7 +10,8 @@
         <projectUrl>http://xcc.codeplex.com</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>A XAML preprocessor adding conditional compilation support to XAML files</description>
-        <releaseNotes>1.0.2: Added support for Xamarin Forms
+        <releaseNotes>1.0.3: Added support for Visual C++ projects
+1.0.2: Added support for Xamarin Forms
 1.0.1: Fixed trailing content bug</releaseNotes>
         <copyright>Copyright 2014 First Floor Software</copyright>
         <tags>XAML, preprocessor, conditional compilation</tags>
