@@ -22,6 +22,11 @@ Copyright (C) First Floor Software. All rights reserved.
       <!-- support for .NET projects (used by default) -->
       <PreprocessorDefinitions>$(DefineConstants)</PreprocessorDefinitions>
 
+      <!--Ensure atleast one constant is defined. If none are defined, the $(DefineConstants) property is empty.
+      This can happen in Release builds without Trace defined for WPF projects and will error the build on the PreprocessXaml task.-->
+      <PreprocessorDefinitions Condition="'$(PreprocessorDefinitions)' == ''">XCC</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(PreprocessorDefinitions)' != ''">$(PreprocessorDefinitions);XCC</PreprocessorDefinitions>
+      
       <!-- support for Visual C++ projects (will override the definition above as 'DefineConstants' and 'ClCompile.PreprocessorDefinitions' cannot be co-existant) -->
       <PreprocessorDefinitions Condition="%(ClCompile.PreprocessorDefinitions) != ''">%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
     </PropertyGroup>
