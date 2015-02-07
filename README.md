@@ -1,4 +1,4 @@
-# xcc
+# XCC
 XAML Conditional Compilation
 
 Welcome to XCC, a preprocessor adding conditional compilation support to XAML files. Enable XCC in your project by installing a tiny NuGet package. Supporting *Windows Universal*, *WPF*, *Managed C++*, and *Xamarin Forms* projects. Other project types have not been tested.
