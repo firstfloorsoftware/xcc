@@ -148,8 +148,11 @@ namespace FirstFloor.Xcc
                 updated = true;
 
                 if (elemMatch.Value) {
-                    // move element to same namespace as root
-                    element.Name = XName.Get(element.Name.LocalName, element.Document.Root.Name.NamespaceName);
+                    // move element to default namespace, if not found fall-back to root namespace
+                    var root = element.Document.Root;
+                    var defaultXmlns = root.Attributes("xmlns").FirstOrDefault();
+                    var nsName = defaultXmlns != null ? defaultXmlns.Value : root.Name.NamespaceName;
+                    element.Name = XName.Get(element.Name.LocalName, nsName);
                 }
                 else {
                     // remove element
