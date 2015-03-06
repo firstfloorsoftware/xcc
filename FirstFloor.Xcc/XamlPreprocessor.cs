@@ -15,15 +15,18 @@ namespace FirstFloor.Xcc
     public class XamlPreprocessor
     {
         private string[] definedSymbols;
+        private bool removeIgnorableContent;
         private Dictionary<string, bool> conditionResults = new Dictionary<string, bool>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XamlPreprocessor"/> class.
         /// </summary>
         /// <param name="definedSymbols">The defined symbols.</param>
-        public XamlPreprocessor(string definedSymbols)
+        /// <param name="removeIgnorableContent">Whether to remove ignorable content.</param>
+        public XamlPreprocessor(string definedSymbols, bool removeIgnorableContent)
         {
-            this.definedSymbols = definedSymbols.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
+            this.definedSymbols = (definedSymbols ?? string.Empty).Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
+            this.removeIgnorableContent = removeIgnorableContent;
         }
 
         /// <summary>
@@ -84,8 +87,24 @@ namespace FirstFloor.Xcc
 
         private bool ProcessXaml(XDocument xamlDoc)
         {
-            var updated = false;    // indicates whether the XAML has been updated
+            // indicates whether the XAML has been updated
+            var updated = false;    
 
+            // find the ignorable prefixes defined in optional mc:Ignorable
+            var ignorableAttribute = xamlDoc.Root.Attribute(XName.Get("Ignorable", Xmlns.MarkupCompatibility));
+            string[] ignorablePrefixes = null;
+            if (ignorableAttribute != null) {
+                ignorablePrefixes = ignorableAttribute.Value.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);      //char[0] defaults to any whitespace
+            }
+
+            // lookup ignorable namespace names (excluding condition namespaces) that should be removed
+            var removeNamespaceNames = new string[0];
+            if (this.removeIgnorableContent && ignorablePrefixes != null) {
+                removeNamespaceNames = (from a in xamlDoc.Root.Attributes()
+                                        where a.IsNamespaceDeclaration && !IsCondition(a.Value) && ignorablePrefixes.Contains(a.Name.LocalName)
+                                        select a.Value).ToArray();
+            }
+            
             // using a Stack rather than relatively slow recursion
             var stack = new Stack<XElement>();
             stack.Push(xamlDoc.Root);
@@ -93,7 +112,7 @@ namespace FirstFloor.Xcc
             while (stack.Count > 0) {
                 var element = stack.Pop();
                 bool elementUpdated;
-                if (ProcessElement(element, out elementUpdated)) {
+                if (ProcessElement(element, removeNamespaceNames, out elementUpdated)) {
                     foreach (var e in element.Elements()) {
                         stack.Push(e);
                     }
@@ -108,7 +127,7 @@ namespace FirstFloor.Xcc
             //  * Xamarin Forms crashes on custom condition namespaces
             var removedPrefixes = new List<string>();
             foreach (var attr in from a in xamlDoc.Root.Attributes().ToArray()          // ToArray since we are modifying the attribute collection
-                                 where a.Name == XName.Get("ProcessContent", Xmlns.MarkupCompatibility) || (a.IsNamespaceDeclaration && a.Value.StartsWith("condition:"))
+                                 where a.Name == XName.Get("ProcessContent", Xmlns.MarkupCompatibility) || (a.IsNamespaceDeclaration && (IsCondition(a.Value) || removeNamespaceNames.Contains(a.Value)))
                                  select a) {
                 attr.Remove();
 
@@ -118,13 +137,25 @@ namespace FirstFloor.Xcc
 
                 updated = true;
             }
-
-            if (removedPrefixes.Any()) {
-                // update existing mc:Ignorable accordingly
-                var ignorableAttribute = xamlDoc.Root.Attribute(XName.Get("Ignorable", Xmlns.MarkupCompatibility));
+            
+            if (this.removeIgnorableContent) {
                 if (ignorableAttribute != null) {
-                    var prefixes = ignorableAttribute.Value.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);      //char[0] defaults to any whitespace
-                    ignorableAttribute.Value = string.Join(" ", from p in prefixes
+                    // remove mc:Ignorable attribute entirely
+                    ignorableAttribute.Remove();
+                    updated = true;
+                }
+
+                // both mc:ProcessContent and mc:Ignorable have been removed, remove xmlns:mc="" as well
+                var mcXmlnsAttribute = xamlDoc.Root.Attributes().FirstOrDefault(a => a.IsNamespaceDeclaration && a.Value == Xmlns.MarkupCompatibility);
+                if (mcXmlnsAttribute != null) {
+                    mcXmlnsAttribute.Remove();
+                    updated = true;
+                }
+            }
+            else if (removedPrefixes.Any()) {
+                // update existing mc:Ignorable accordingly
+                if (ignorableAttribute != null) {
+                    ignorableAttribute.Value = string.Join(" ", from p in ignorablePrefixes
                                                                 where !removedPrefixes.Contains(p)
                                                                 select p);
 
@@ -138,12 +169,12 @@ namespace FirstFloor.Xcc
             return updated;
         }
 
-        private bool ProcessElement(XElement element, out bool updated)
+        private bool ProcessElement(XElement element, string[] removeNamespaceNames, out bool updated)
         {
             updated = false;
 
             // check if element should be included
-            var elemMatch = Include(element.Name);
+            var elemMatch = Include(element.Name, removeNamespaceNames);
             if (elemMatch.HasValue) {
                 updated = true;
 
@@ -164,7 +195,7 @@ namespace FirstFloor.Xcc
 
             // process attributes
             foreach (var attribute in element.Attributes().ToArray()) {
-                var attrMatch = Include(attribute.Name);
+                var attrMatch = Include(attribute.Name, removeNamespaceNames);
 
                 if (attrMatch.HasValue) {
                     updated = true;
@@ -193,8 +224,13 @@ namespace FirstFloor.Xcc
             return true;
         }
 
-        private bool? Include(XName name)
+        private bool? Include(XName name, string[] removeNamespaceNames)
         {
+            // first check if ignorable content should be removed
+            if (this.removeIgnorableContent && removeNamespaceNames.Contains(name.NamespaceName)) {
+                return false;
+            }
+
             var condition = GetCondition(name);
 
             // no condition, ignore
@@ -220,10 +256,15 @@ namespace FirstFloor.Xcc
 
         private static string GetCondition(XName name)
         {
-            if (name.NamespaceName.StartsWith("condition:")) {
+            if (IsCondition(name.NamespaceName)) {
                 return name.NamespaceName.Substring(10);
             }
             return null;
+        }
+
+        private static bool IsCondition(string value)
+        {
+            return value.StartsWith("condition:", StringComparison.InvariantCulture);
         }
     }
 }

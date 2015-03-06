@@ -59,7 +59,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="SnippetTests.cs" />
+    <Compile Include="XmlTests.cs" />
+    <Compile Include="ConditionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PageTests.cs" />
   </ItemGroup>
@@ -73,6 +74,10 @@
     <EmbeddedResource Include="Xaml\MyPage.Win81.Debug.expected.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Xaml\MyPage.Win81.Release.RemoveIgnorableContent.expected.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
     <EmbeddedResource Include="Xaml\MyPage.xaml">
       <SubType>Designer</SubType>
@@ -123,6 +128,24 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Xaml\XamarinContentPage.nosymbols.expected.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Xaml\MyPage.Win81.Debug.RemoveIgnorableContent.expected.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Xaml\MyPage.WP81.Debug.RemoveIgnorableContent.expected.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Xaml\MyPage.WP81.Release.RemoveIgnorableContent.expected.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </EmbeddedResource>

@@ -45,6 +45,7 @@ Copyright (C) First Floor Software. All rights reserved.
                     Pages="@(Page)"
                     EmbeddedXamlResources="@(EmbeddedXamlResource)"
                     DefinedSymbols="$(PreprocessorDefinitions)"
+                    RemoveIgnorableContent="$(XccRemoveIgnorableContent)"
                     OutputPath="$(IntermediateOutputPath)preprocessedxaml\">
       <Output ItemName="NewApplicationDefinition" TaskParameter="NewApplicationDefinitions" />
       <Output ItemName="NewPage" TaskParameter="NewPages" />

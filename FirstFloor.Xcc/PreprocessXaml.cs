@@ -40,6 +40,13 @@ namespace FirstFloor.Xcc
         /// </summary>
         [Required]
         public string OutputPath { get; set; }
+        /// <summary>
+        /// Determines whether ignorable content should be removed.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if [remove ignorable content]; otherwise, <c>false</c>.
+        /// </value>
+        public bool RemoveIgnorableContent { get; set; }
 
         /// <summary>
         /// The output NewApplicationDefinitions parameter.
@@ -73,7 +80,7 @@ namespace FirstFloor.Xcc
             try {
                 Log.LogMessage(MessageImportance.Normal, "XCC > DefinedSymbols: {0}", string.Join(",", this.DefinedSymbols));
 
-                var preprocessor = new XamlPreprocessor(this.DefinedSymbols);
+                var preprocessor = new XamlPreprocessor(this.DefinedSymbols, this.RemoveIgnorableContent);
 
                 var generatedFiles = new List<ITaskItem>();
 

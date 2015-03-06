@@ -5,7 +5,7 @@ using System.Globalization;
 namespace FirstFloor.Xcc.Test
 {
     [TestClass]
-    public class SnippetTests
+    public class ConditionTests
     {
         [TestMethod]
         public void TestButtonBackgroundWin81()
@@ -244,7 +244,7 @@ namespace FirstFloor.Xcc.Test
 
         private static void TestXaml(string symbols, string xamlSnippet, string expectedResult)
         {
-            var preprocessor = new XamlPreprocessor(symbols);
+            var preprocessor = new XamlPreprocessor(symbols, false);
             var xaml = CreateInputXamlPage(xamlSnippet);
             var result = preprocessor.ProcessXaml(xaml);
 
