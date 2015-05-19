@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,8 @@ namespace FirstFloor.Xcc
     /// </summary>
     public class XamlPreprocessor
     {
+        private static readonly XName LineNumberName = "__line";
+
         private string[] definedSymbols;
         private bool removeIgnorableContent;
         private Dictionary<string, bool> conditionResults = new Dictionary<string, bool>();
@@ -37,13 +40,14 @@ namespace FirstFloor.Xcc
         /// <returns>A value indicating whether the target XAML file has been written. If no changes are made to the XAML, the targetPath is not written and false is returned.</returns>
         public bool ProcessXamlFile(string sourcePath, string targetPath)
         {
-            var xamlDoc = XDocument.Load(sourcePath, LoadOptions.PreserveWhitespace);
-            if (ProcessXaml(xamlDoc)) {
+            var xamlDoc = XDocument.Load(sourcePath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
+            var result = ProcessXaml(xamlDoc);
+            if (result != null) {
                 // ensure target directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
 
                 using (var stream = File.Create(targetPath)) {
-                    SaveDocument(xamlDoc, stream);
+                    SaveDocument(result, stream);
                 }
                 return true;
             }
@@ -57,13 +61,14 @@ namespace FirstFloor.Xcc
         /// <returns></returns>
         public string ProcessXaml(string xaml)
         {
-            var xamlDoc = XDocument.Parse(xaml, LoadOptions.PreserveWhitespace);
-            if (!ProcessXaml(xamlDoc)) {
+            var xamlDoc = XDocument.Parse(xaml, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
+            var result = ProcessXaml(xamlDoc);
+            if (result == null) {
                 return xaml;        // no changes, return XAML as-is
             }
 
             using (var stream = new MemoryStream()) {
-                SaveDocument(xamlDoc, stream);
+                SaveDocument(result, stream);
 
                 stream.Seek(0, SeekOrigin.Begin);
                 using (var reader = new StreamReader(stream)) {
@@ -85,7 +90,7 @@ namespace FirstFloor.Xcc
             writer.Flush();
         }
 
-        private bool ProcessXaml(XDocument xamlDoc)
+        private XDocument ProcessXaml(XDocument xamlDoc)
         {
             // indicates whether the XAML has been updated
             var updated = false;    
@@ -166,7 +171,72 @@ namespace FirstFloor.Xcc
                 }
             }
 
-            return updated;
+            if (updated) {
+                // re-read xdocument and adjust xelements so they are on original line numbers
+                return AdjustLineNumbers(xamlDoc);
+
+            }
+            // not updated
+            return null;
+        }
+
+        private static bool IsWhitespace(XNode node)
+        {
+            if (node.NodeType == XmlNodeType.Whitespace || node.NodeType == XmlNodeType.SignificantWhitespace) {
+                return true;
+            }
+            var text = node as XText;
+            return text != null && text.Value.Trim().Length == 0;
+        }
+
+        /// <summary>
+        /// Returns an XDocument where the XElement instances are
+        /// positioned at the exact same line number as the original xml source.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        private static XDocument AdjustLineNumbers(XDocument input)
+        {
+            XDocument result;
+            // save input to stream and re-read
+            using (var stream = new MemoryStream()) {
+                input.Save(stream, SaveOptions.DisableFormatting);
+
+                stream.Seek(0, SeekOrigin.Begin);
+
+                // read serialized xml
+                result = XDocument.Load(stream, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
+            }
+
+            // find line info on each element and insert whitespace where needed
+            var offset = 0;
+            foreach (var element in result.Descendants()) {
+                var lineInfo = (IXmlLineInfo)element;
+
+                var originalLineAttr = element.Attribute(LineNumberName);
+                if (originalLineAttr == null) {
+                    continue;
+                }
+                int originalLineNumber;
+                if (int.TryParse((string)originalLineAttr, NumberStyles.Integer, CultureInfo.InvariantCulture, out originalLineNumber)) {
+                    if (originalLineNumber > lineInfo.LineNumber + offset) {
+                        var count = originalLineNumber - lineInfo.LineNumber - offset;
+                        var whitespace = new XText(string.Join(Environment.NewLine, new string[count + 1]));
+                        offset += count;
+
+                        // insert newlines before whitespace of element
+                        XNode node = element;
+                        while (node.PreviousNode != null && IsWhitespace(node.PreviousNode)) {
+                            node = node.PreviousNode;
+                        }
+                        node.AddBeforeSelf(whitespace);
+                    }
+                }
+                // and remove line number attribute
+                originalLineAttr.Remove();
+            }
+
+            return result;
         }
 
         private bool ProcessElement(XElement element, string[] removeNamespaceNames, out bool updated)
@@ -220,6 +290,9 @@ namespace FirstFloor.Xcc
                     }
                 }
             }
+
+            // add linenumber info
+            element.SetAttributeValue(LineNumberName, ((IXmlLineInfo)element).LineNumber);
 
             return true;
         }

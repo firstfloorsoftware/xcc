@@ -35,6 +35,8 @@ namespace FirstFloor.Xcc.Test
 </Test>";
             var expected = @"
 <Test>
+
+
   <Element />
   
 </Test>";
@@ -57,6 +59,11 @@ namespace FirstFloor.Xcc.Test
 </foo:Test>";
             var expected = @"
 <foo:Test xmlns=""http://xcc.com"" xmlns:d=""http://schemas.microsoft.com/expression/blend/2008"" xmlns:mc=""http://schemas.openxmlformats.org/markup-compatibility/2006"" xmlns:foo=""http://foo"" mc:Ignorable=""d"">
+
+
+
+
+
   <Element d:Foo=""42"" />
   <Element />
 </foo:Test>";
@@ -78,6 +85,10 @@ namespace FirstFloor.Xcc.Test
 </foo:Test>";
             var expected = @"
 <foo:Test xmlns:d=""http://schemas.microsoft.com/expression/blend/2008"" xmlns:mc=""http://schemas.openxmlformats.org/markup-compatibility/2006"" xmlns:foo=""http://foo"" mc:Ignorable=""d"">
+
+
+
+
   <Element d:Foo=""42"" />
   <foo:Element />
 </foo:Test>";
@@ -100,6 +111,11 @@ namespace FirstFloor.Xcc.Test
 </foo:Test>";
             var expected = @"
 <foo:Test xmlns=""http://xcc.com"" xmlns:foo=""http://foo"">
+
+
+
+
+
   <Element />
   <Element />
 </foo:Test>";
@@ -121,6 +137,10 @@ namespace FirstFloor.Xcc.Test
 </foo:Test>";
             var expected = @"
 <foo:Test xmlns:foo=""http://foo"">
+
+
+
+
   <Element />
   <foo:Element />
 </foo:Test>";

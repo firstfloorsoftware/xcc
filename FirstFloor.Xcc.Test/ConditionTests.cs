@@ -237,6 +237,8 @@ namespace FirstFloor.Xcc.Test
 </wp81:Grid>",
                 @"
 
+
+
 <Grid>
   <AdControl xmlns=""using:Microsoft.Advertising.Mobile.UI"" />
 </Grid>");

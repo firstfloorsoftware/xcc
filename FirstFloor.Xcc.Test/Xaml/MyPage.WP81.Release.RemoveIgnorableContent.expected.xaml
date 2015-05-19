@@ -1,11 +1,36 @@
 ﻿<Page x:Class="App1.MainPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:App1">
 
+
+
+
+
+
+
+
+
+
+
+
+
+
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel>
             <Button Content="Default button" />
             <Button Content="Colored button" Background="Green" />
             
             <Button Content="Windows Phone 8.1" />
+
+
+
+
+
+
+
+
+
+
+
+
 
             
 
