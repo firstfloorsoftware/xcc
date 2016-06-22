@@ -3,3 +3,7 @@
 ################################################################################
 
 /FirstFloor.Xcc/bin/Debug
+/FirstFloor.Xcc/obj/Debug
+/FirstFloor.Xcc.Test/bin/Debug
+/FirstFloor.Xcc.Test/obj/Debug
+/.vs/FirstFloor.Xcc/v14/.suo
