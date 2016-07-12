@@ -12,7 +12,7 @@ Copyright (C) First Floor Software. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask TaskName="PreprocessXaml" AssemblyFile="$(MSBuildThisFileDirectory)..\bin\Debug\Xcc.dll" />
 
-  <Target Name="GenerateXaml" BeforeTargets="XamlMarkupCompilePass1" AfterTargets="_PreXamlG">
+  <Target Name="GenerateXaml" BeforeTargets="XamlMarkupCompilePass1;MarkupCompilePass1" AfterTargets="_PreXamlG">
     <!-- create collection for embedded xaml resources -->
     <CreateItem Include="@(EmbeddedResource)" Condition="'%(Extension)' == '.xaml'">
       <Output TaskParameter="Include" ItemName="EmbeddedXamlResource"/>
